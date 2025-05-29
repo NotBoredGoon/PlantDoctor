@@ -5,20 +5,16 @@ from dotenv import load_dotenv
 import os
 import csv
 
-# Load .env file named keys.env in current directory
 load_dotenv(dotenv_path=".env")
 
-# --- CONFIG ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
-# --- Step 1: Load and encode image as base64 ---
 def encode_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode('utf-8')
 
-# --- Step 2: Get 3-day weather forecast from OpenWeatherMap using ZIP code ---
-def get_weather_forecast(zip_code, api_key):
+def get_prompt_text(zip_code, api_key):
     lat, lon = 0, 0
     with open('uszips.csv', 'r') as file:
         csv_reader = csv.reader(file)
@@ -26,15 +22,13 @@ def get_weather_forecast(zip_code, api_key):
             if row[0] == zip_code:
                 lat = row[1]
                 lon = row[2]
-    print(f"lat: {lat} | lon: {lon} | apikey: {api_key}")
+    # print(f"lat: {lat} | lon: {lon} | apikey: {api_key}")
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly&appid={api_key}"
-            # https://api.openweathermap.org/data/3.0/onecall?lat=33.44&lon=-94.04&exclude=current,minutely,hourly&appid={key}
 
     response = requests.get(url)
     forecast = response.json()
     
     print(forecast)
-    summaries = []
 
     forecast_days = 8
     total_sum_day_temp = 0
@@ -64,15 +58,15 @@ def get_weather_forecast(zip_code, api_key):
     print(f"average_day_temp: {average_day_temp} | average_humidity: {average_humidity} | average_wind_speed: {average_wind_speed} | average_cloudiness: {average_cloudiness} | average_uvi: {average_uvi} | average_rain: {average_rain}")
 
     return f"Given the weather in zip code {zip_code} for the next {forecast_days} days has an average day temperature of {average_day_temp} Kelvin, humidity of {average_humidity}, windspeed of {average_wind_speed}, {average_cloudiness}% cloud coverage, uvi {average_uvi}, precipitation {average_rain}mm, tell me concisely how to generally treat this plant for the next week in terms of watering and positioning. Additionally, concisely explain any worries or problems that may exist with the plant."
-# --- Step 3: Call OpenAI Vision API with image and weather context ---
-def analyze_plant(image_path, weather_info, zip_code):
+
+def analyze_plant(image_path, prompt_text, zip_code):
     base64_image = encode_image(image_path)
     openai.api_key = OPENAI_API_KEY
 
     prompt_text = (
         f"Here is an image of my plant, located in ZIP code {zip_code}. "
         "Tell me how it's doing, if it's healthy, and what I should do in the coming days. "
-        f"Here's the 3-day weather forecast for my area:\n{weather_info}"
+        f"Here's the 3-day weather forecast for my area:\n{prompt_text}"
     )
 
     response = openai.chat.completions.create(
@@ -89,9 +83,8 @@ def analyze_plant(image_path, weather_info, zip_code):
     )
     return response.choices[0].message.content
 
-# --- Main Runner ---
 if __name__ == "__main__":
-    image_path = "images/disease tomato.jpg"  # Replace with your plant image path
+    image_path = "images/disease tomato.jpg" 
     
     zip_code = None
     while not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
@@ -100,9 +93,8 @@ if __name__ == "__main__":
             print("Invalid ZIP code. Please enter exactly 5 digits.")
 
     try:
-        weather_info = get_weather_forecast(zip_code, WEATHER_API_KEY)
-        print(f"\nWeather forecast for ZIP code {zip_code} (next ~3 days):\n{weather_info}\n")
-        result = analyze_plant(image_path, weather_info, zip_code)
+        prompt_text = get_prompt_text(zip_code, WEATHER_API_KEY)
+        result = analyze_plant(image_path, prompt_text, zip_code)
         print("\nPlant Analysis & Advice:\n", result)
     except Exception as e:
         print("Error:", e)
