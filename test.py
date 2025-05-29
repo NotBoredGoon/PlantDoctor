@@ -3,6 +3,7 @@ import base64
 import requests
 from dotenv import load_dotenv
 import os
+import csv
 
 # Load .env file named keys.env in current directory
 load_dotenv(dotenv_path="keys.env")
@@ -18,7 +19,16 @@ def encode_image(image_path):
 
 # --- Step 2: Get 3-day weather forecast from OpenWeatherMap using ZIP code ---
 def get_weather_forecast(zip_code, api_key):
-    url = f"http://api.openweathermap.org/data/2.5/forecast?zip={zip_code},us&appid={api_key}&units=metric"
+    with open('uszips.csv', 'r') as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            if row[0] == zip_code:
+                lat = row[1]
+                lon = row[2]
+    print(f"lat: {lat} | lon: {lon}")
+    url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly&appid={api_key}"
+            # https://api.openweathermap.org/data/3.0/onecall?lat=33.44&lon=-94.04&exclude=current,minutely,hourly&appid={key}
+
     response = requests.get(url)
     forecast = response.json()
     
@@ -26,7 +36,8 @@ def get_weather_forecast(zip_code, api_key):
         raise Exception(f"Weather API error: {forecast.get('message')}")
 
     summaries = []
-    for item in forecast["list"][:24]:
+    # Get 3-hour interval forecasts for the next 5 days
+    for item in forecast["list"]:
         dt_txt = item["dt_txt"]
         temp = item["main"]["temp"]
         weather = item["weather"][0]["description"]
@@ -61,7 +72,7 @@ def analyze_plant(image_path, weather_info, zip_code):
 
 # --- Main Runner ---
 if __name__ == "__main__":
-    image_path = "your_plant_image.jpg"  # Replace with your plant image path
+    image_path = "images/disease tomato.jpg"  # Replace with your plant image path
     
     zip_code = None
     while not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
