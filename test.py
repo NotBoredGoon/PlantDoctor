@@ -6,7 +6,7 @@ import os
 import csv
 
 # Load .env file named keys.env in current directory
-load_dotenv(dotenv_path="keys.env")
+load_dotenv(dotenv_path=".env")
 
 # --- CONFIG ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -19,24 +19,30 @@ def encode_image(image_path):
 
 # --- Step 2: Get 3-day weather forecast from OpenWeatherMap using ZIP code ---
 def get_weather_forecast(zip_code, api_key):
+    lat, lon = 0, 0
     with open('uszips.csv', 'r') as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             if row[0] == zip_code:
                 lat = row[1]
                 lon = row[2]
-    print(f"lat: {lat} | lon: {lon}")
+    print(f"lat: {lat} | lon: {lon} | apikey: {api_key}")
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly&appid={api_key}"
             # https://api.openweathermap.org/data/3.0/onecall?lat=33.44&lon=-94.04&exclude=current,minutely,hourly&appid={key}
 
     response = requests.get(url)
     forecast = response.json()
     
-    if forecast.get("cod") != "200":
-        raise Exception(f"Weather API error: {forecast.get('message')}")
-
+    print(forecast)
     summaries = []
-    # Get 3-hour interval forecasts for the next 5 days
+
+    forecast_days = 8
+    total_sum = 0
+    for i in range(0, forecast_days):
+        total_sum += forecast["daily"][i]["temp"]["day"]
+    average_temp = total_sum // forecast_days
+    print(f"average_temp: {average_temp}")
+
     for item in forecast["list"]:
         dt_txt = item["dt_txt"]
         temp = item["main"]["temp"]
