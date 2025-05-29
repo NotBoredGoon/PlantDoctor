@@ -37,20 +37,33 @@ def get_weather_forecast(zip_code, api_key):
     summaries = []
 
     forecast_days = 8
-    total_sum = 0
+    total_sum_day_temp = 0
+    total_sum_humidity = 0
+    total_sum_wind_speed = 0
+    total_sum_cloudiness = 0
+    total_sum_uvi = 0
+    total_sum_rain = 0
     for i in range(0, forecast_days):
-        total_sum += forecast["daily"][i]["temp"]["day"]
-    average_temp = total_sum // forecast_days
-    print(f"average_temp: {average_temp}")
+        total_sum_day_temp += forecast["daily"][i]["temp"]["day"]
+        total_sum_humidity += forecast["daily"][i]["humidity"]
+        total_sum_wind_speed += forecast["daily"][i]["wind_speed"]
+        total_sum_cloudiness += forecast["daily"][i]["clouds"]
+        total_sum_uvi += forecast["daily"][i]["uvi"]
+        try:
+            total_sum_rain += forecast["daily"][i]["rain"]
+            print(forecast["daily"][i]["rain"])
+        except:
+            pass
+    average_day_temp = total_sum_day_temp // forecast_days
+    average_humidity = total_sum_humidity // forecast_days
+    average_wind_speed = total_sum_wind_speed // forecast_days
+    average_cloudiness = total_sum_cloudiness // forecast_days
+    average_uvi = total_sum_uvi // forecast_days
+    average_rain = total_sum_rain // forecast_days
 
-    for item in forecast["list"]:
-        dt_txt = item["dt_txt"]
-        temp = item["main"]["temp"]
-        weather = item["weather"][0]["description"]
-        summaries.append(f"{dt_txt}: {temp}°C, {weather}")
-    
-    return "\n".join(summaries)
+    print(f"average_day_temp: {average_day_temp} | average_humidity: {average_humidity} | average_wind_speed: {average_wind_speed} | average_cloudiness: {average_cloudiness} | average_uvi: {average_uvi} | average_rain: {average_rain}")
 
+    return f"Given the weather in zip code {zip_code} for the next {forecast_days} days has an average day temperature of {average_day_temp} Kelvin, humidity of {average_humidity}, windspeed of {average_wind_speed}, {average_cloudiness}% cloud coverage, uvi {average_uvi}, precipitation {average_rain}mm, tell me concisely how to generally treat this plant for the next week in terms of watering and positioning. Additionally, concisely explain any worries or problems that may exist with the plant."
 # --- Step 3: Call OpenAI Vision API with image and weather context ---
 def analyze_plant(image_path, weather_info, zip_code):
     base64_image = encode_image(image_path)
