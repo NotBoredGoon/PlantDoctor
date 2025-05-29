@@ -70,7 +70,7 @@ def analyze_plant(image_path, prompt_text, zip_code):
     )
 
     response = openai.chat.completions.create(
-        model="gpt-4-vision-preview",
+        model="gpt-4.1-nano",
         messages=[
             {"role": "user", "content": [
                 {"type": "text", "text": prompt_text},
@@ -79,7 +79,6 @@ def analyze_plant(image_path, prompt_text, zip_code):
                 }}
             ]}
         ],
-        max_tokens=1000
     )
     return response.choices[0].message.content
 
