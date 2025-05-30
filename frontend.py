@@ -37,15 +37,15 @@ def send_message(event=None):
 def upload_image():
     """Handle uploading an image."""
     file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg")])
-    if file_path:
-        # Simulate displaying uploaded image in chat
-        chatbox.configure(state=tk.NORMAL)
-        chatbox.insert(tk.END, "You uploaded an image.\n", "user")
-        chatbox.insert(tk.END, "AI: Image received. Analyzing...\n", "ai")
-        chatbox.configure(state=tk.DISABLED)
+    # if file_path:
+    #     # Simulate displaying uploaded image in chat
+    #     chatbox.configure(state=tk.NORMAL)
+    #     chatbox.insert(tk.END, "You uploaded an image.\n", "user")
+    #     chatbox.insert(tk.END, "AI: Image received. Analyzing...\n", "ai")
+    #     chatbox.configure(state=tk.DISABLED)
 
-        # Auto-scroll to the bottom
-        chatbox.see(tk.END)
+    #     # Auto-scroll to the bottom
+    #     chatbox.see(tk.END)
 
 
 def submit_preferences():
@@ -60,6 +60,18 @@ def submit_preferences():
     if not selected_language.strip():
         error_label.config(text="Please select a language.")
         return
+
+    # Hide preferences frame and show chat frame
+    error_label.config(text="")
+    preferences_frame.pack_forget()
+    chat_frame.pack(fill=tk.BOTH, expand=True)
+
+
+def handle_submit():
+    zip_code = zip_entry.get()
+    selected_language = language_dropdown.get()
+
+    
 
     # Hide preferences frame and show chat frame
     error_label.config(text="")
@@ -97,6 +109,9 @@ languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese", "H
 language_dropdown = ttk.Combobox(preferences_frame, values=languages, font=("Arial", 12), state="readonly")
 language_dropdown.pack(pady=5)
 
+upload_button = tk.Button(preferences_frame, text="Upload Image 🖼️", font=("Arial", 12), command=upload_image, bg="white")
+upload_button.pack(pady=10)
+
 start_button = tk.Button(preferences_frame, text="Start", font=("Arial", 14), bg="darkgreen", fg="white", command=submit_preferences)
 start_button.pack(pady=20)
 
@@ -127,9 +142,6 @@ input_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
 
 camera_icon_button = tk.Button(input_frame, text="📷", font=("Arial", 12), bg="white", state=tk.DISABLED)
 camera_icon_button.pack(side=tk.LEFT, padx=5)
-
-upload_button = tk.Button(input_frame, text="🖼️", font=("Arial", 12), command=upload_image, bg="white")
-upload_button.pack(side=tk.LEFT, padx=5)
 
 user_entry = tk.Entry(input_frame, font=("Arial", 12))
 user_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
