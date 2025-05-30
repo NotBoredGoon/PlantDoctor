@@ -95,6 +95,10 @@ def handle_submit():
     chatbox.configure(state=tk.DISABLED)
     chatbox.see(tk.END)     # Auto-scroll to the bottom
 
+    # Force the UI to update before processing
+    root.update()
+
+    # Process image after showing the chat window
     response_text = backend.process_image(zip_code, file_path)
     chatbox.configure(state=tk.NORMAL)
     chatbox.insert(tk.END, f"\n{response_text}", "ai")
