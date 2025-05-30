@@ -12,6 +12,9 @@ body {
   background-color: var(--secondary-color);
   margin: 0;
   padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 .app-container {
@@ -100,6 +103,7 @@ body {
   padding: 15px;
   height: 300px;
   overflow-y: auto;
+  
 }
 
 .chat-message {
