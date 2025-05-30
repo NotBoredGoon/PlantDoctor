@@ -78,9 +78,10 @@ const App = () => {
         <Chatbot messages={messages} />
 
         <div className="future-feature">
-          <h2>Future Vision: Drone Analysis</h2>
-          <p>Imagine analyzing entire fields with drone footage. Here's a concept map of how PlantDoctor would highlight areas needing attention.</p>
-          <img src="https://storage.googleapis.com/gweb-cloudblog-publish/images/social_image_2022_07_27_10_01_00_0700_399.max-1000x1000.png" alt="Example map of drone footage analysis" className="map-image" />
+          <p> 
+          <br />
+          <br />
+          </p>
         </div>
       </main>
     </div>
