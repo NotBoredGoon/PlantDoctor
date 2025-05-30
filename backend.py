@@ -57,17 +57,15 @@ def get_prompt_text(zip_code, api_key):
 
     print(f"average_day_temp: {average_day_temp} | average_humidity: {average_humidity} | average_wind_speed: {average_wind_speed} | average_cloudiness: {average_cloudiness} | average_uvi: {average_uvi} | average_rain: {average_rain}")
 
-    return f"Given the weather in zip code {zip_code} for the next {forecast_days} days has an average day temperature of {average_day_temp} Kelvin, humidity of {average_humidity}, windspeed of {average_wind_speed}, {average_cloudiness}% cloud coverage, uvi {average_uvi}, precipitation {average_rain}mm, tell me concisely how to generally treat this plant for the next week in terms of watering and positioning. Additionally, concisely explain any worries or problems that may exist with the plant."
+    return f"""Based on the weather in zip code {zip_code} for the next {forecast_days} days consists of average day temperature of {average_day_temp} Kelvin, average humidity of {average_humidity}, 
+    average windspeed of {average_wind_speed} metres per second, average {average_cloudiness}% cloud coverage, average uvi {average_uvi}, average rain volume {average_rain}mm, tell me 
+    how to treat this plant (Mention the specifc type) for the next week in terms of watering, and positioning but be concise/readable (bullet points) and 
+    consider the upcoming weather (though you don't have to necessarily mention it). Don't be too vague
+    Also, concisely explain any possible glaring issue(s) with the plant, such as signs of a specific disease, naming it and its specific treatment explicitly. Don't repeat the same tips multiple times."""
 
-def analyze_plant(image_path, prompt_text, zip_code):
+def analyze_plant(image_path, prompt_text):
     base64_image = encode_image(image_path)
     openai.api_key = OPENAI_API_KEY
-
-    prompt_text = (
-        f"Here is an image of my plant, located in ZIP code {zip_code}. "
-        "Tell me how it's doing, if it's healthy, and what I should do in the coming days. "
-        f"Here's the 3-day weather forecast for my area:\n{prompt_text}"
-    )
 
     response = openai.chat.completions.create(
         model="gpt-4.1-nano",
@@ -85,7 +83,7 @@ def analyze_plant(image_path, prompt_text, zip_code):
 def process_image(zip_code, image_path):
     try:
         prompt_text = get_prompt_text(zip_code, WEATHER_API_KEY)
-        result = analyze_plant(image_path, prompt_text, zip_code)
+        result = analyze_plant(image_path, prompt_text)
         return result
     except Exception as e:
         return f"Error: e"
