@@ -82,6 +82,14 @@ def analyze_plant(image_path, prompt_text, zip_code):
     )
     return response.choices[0].message.content
 
+def process_image(zip_code, image_path):
+    try:
+        prompt_text = get_prompt_text(zip_code, WEATHER_API_KEY)
+        result = analyze_plant(image_path, prompt_text, zip_code)
+        return result
+    except Exception as e:
+        return f"Error: e"
+
 if __name__ == "__main__":
     image_path = "images/disease tomato.jpg" 
     
@@ -91,9 +99,7 @@ if __name__ == "__main__":
         if not zip_code.isdigit() or len(zip_code) != 5:
             print("Invalid ZIP code. Please enter exactly 5 digits.")
 
-    try:
-        prompt_text = get_prompt_text(zip_code, WEATHER_API_KEY)
-        result = analyze_plant(image_path, prompt_text, zip_code)
-        print("\nPlant Analysis & Advice:\n", result)
-    except Exception as e:
-        print("Error:", e)
+    output_text = process_image(zip_code, image_path)
+    print(f"output_text: {output_text} | type_output_text: {type(output_text)}")
+    
+    
