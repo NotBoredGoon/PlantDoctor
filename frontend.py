@@ -3,6 +3,10 @@ import re
 from tkinter import filedialog
 from tkinter import ttk
 import textwrap
+import backend
+
+# Global variables
+file_path = None
 
 def wrap_text(text, width=100):
     """Wrap text to a specific width."""
@@ -35,7 +39,7 @@ def send_message(event=None):
 
 
 def upload_image():
-    """Handle uploading an image."""
+    global file_path
     file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg")])
     # if file_path:
     #     # Simulate displaying uploaded image in chat
@@ -71,12 +75,33 @@ def handle_submit():
     zip_code = zip_entry.get()
     selected_language = language_dropdown.get()
 
-    
+    if not re.fullmatch(r"\d{5}", zip_code):
+        error_label.config(text="Please enter a valid 5-digit ZIP code.")
+        return
+    if not selected_language.strip():
+        error_label.config(text="Please select a language.")
+        return
 
     # Hide preferences frame and show chat frame
     error_label.config(text="")
     preferences_frame.pack_forget()
     chat_frame.pack(fill=tk.BOTH, expand=True)
+    print(f"file_path: {file_path}")
+
+    # Simulate displaying uploaded image in chat
+    chatbox.configure(state=tk.NORMAL)
+    chatbox.insert(tk.END, "You uploaded an image.\n", "user")
+    chatbox.insert(tk.END, "AI: Image received. Analyzing...\n", "ai")
+    chatbox.configure(state=tk.DISABLED)
+    chatbox.see(tk.END)     # Auto-scroll to the bottom
+
+    response_text = backend.process_image(zip_code, file_path)
+    chatbox.configure(state=tk.NORMAL)
+    chatbox.insert(tk.END, f"\n{response_text}", "ai")
+    chatbox.configure(state=tk.DISABLED)
+    chatbox.see(tk.END)
+
+
 
 
 # Initialize main window
@@ -112,7 +137,7 @@ language_dropdown.pack(pady=5)
 upload_button = tk.Button(preferences_frame, text="Upload Image 🖼️", font=("Arial", 12), command=upload_image, bg="white")
 upload_button.pack(pady=10)
 
-start_button = tk.Button(preferences_frame, text="Start", font=("Arial", 14), bg="darkgreen", fg="white", command=submit_preferences)
+start_button = tk.Button(preferences_frame, text="Start", font=("Arial", 14), bg="darkgreen", fg="white", command=handle_submit)
 start_button.pack(pady=20)
 
 error_label = tk.Label(preferences_frame, text="", font=("Arial", 10), fg="red", bg="lightgreen")
